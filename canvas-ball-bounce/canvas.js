@@ -1,12 +1,10 @@
 const canvas = document.querySelector('#canvas')
-
-const windowWidth = window.innerWidth - 50
-const windowHeight = window.innerHeight - 50
-
-canvas.width = windowWidth
-canvas.height = windowHeight
+const body = document.querySelector('body')
 
 const c = canvas.getContext('2d')
+
+canvas.width = innerWidth 
+canvas.height = innerHeight
 
 // c.fillStyle = '#f87a3a'
 // c.fillRect(100, 100, 100, 100)
@@ -34,6 +32,26 @@ const c = canvas.getContext('2d')
 //   c.stroke()
 // }
 
+const mouse = {
+  x: undefined,
+  y: undefined
+}
+
+window.addEventListener('mousemove', (event) => {
+  mouse.x = event.x
+  mouse.y = event.y
+})
+
+window.addEventListener('resize', (event) => {
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+
+  init()
+})
+
+const maxRadious = 40
+const minRadious = 10
+
 class Circle {
   constructor ({
     x,
@@ -46,6 +64,7 @@ class Circle {
     this.x = x
     this.y = y
     this.radious = radious
+    this.minRadious = radious
     this.speedX = speedX
     this.speedY = speedY
     this.color = color
@@ -60,16 +79,26 @@ class Circle {
   }
 
   update () {
-    if (this.x + this.radious > windowWidth || this.x - this.radious < 0) {
+    if (this.x + this.radious > innerWidth || this.x - this.radious < 0) {
       this.speedX = -this.speedX
     }
   
-    if (this.y + this.radious > windowHeight || this.y - this.radious < 0) {
+    if (this.y + this.radious > innerHeight || this.y - this.radious < 0) {
       this.speedY = -this.speedY
     }
   
     this.x += this.speedX
     this.y += this.speedY
+
+    if (mouse.x - this.x < 50 && mouse.x - this.x > -50 
+        && mouse.y - this.y < 50 && mouse.y - this.y > -50) {
+      if (this.radious < maxRadious) {
+        this.radious++
+      }
+    } else if (this.radious > this.minRadious) {
+      this.radious -= 1
+    }
+
   }
 }
 
@@ -78,18 +107,32 @@ const getRandomNumber = (min, max) => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const circleArray = []
 
-for (let i = 0; i < 1000; i++) {
-  let speedY = (Math.random() - 0.5) * 10
-  let speedX = (Math.random() - 0.5) * 10
-  const radious = getRandomNumber(1, 10)
-  let y = Math.random() * (windowHeight - radious * 2) + radious
-  let x = Math.random() * (windowWidth - radious * 2) + radious
-  color = `#${getRandomNumber(0, 16777215).toString(16)}`
+const colorArry = [
+  '#1B4965',
+  '#62B6CB',
+  '#BEE9E8',
+  '#CAE9FF',
+  '#5FA8D3'
+]
 
-  circleArray.push(new Circle({ x, y, radious, speedX, speedY, color }))
+let circleArray = []
+const init = () => {
+  circleArray = []
+  for (let i = 0; i < 200; i++) {
+    let speedY = (Math.random() - 0.5) * 3
+    let speedX = (Math.random() - 0.5) * 3
+    const radious = getRandomNumber(10, 20)
+    let y = Math.random() * (innerHeight - radious * 2) + radious
+    let x = Math.random() * (innerWidth - radious * 2) + radious
+    color = colorArry[Math.floor(Math.random() * colorArry.length)]
+  
+    circleArray.push(new Circle({ x, y, radious, speedX, speedY, color }))
+  }
+
+  animate()
 }
+
 
 
 const animate = () => {
@@ -103,4 +146,4 @@ const animate = () => {
 
 }
 
-animate()
+init()
